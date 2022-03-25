@@ -37,7 +37,7 @@ jobs:
         id: lint
         uses: golangci/golangci-lint-action@v2
         with:
-          version: v1.43
+          version: v1.45.2
           skip-build-cache: true
           only-new-issues: true
 
