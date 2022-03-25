@@ -93,6 +93,26 @@ func TestAddUser(t *testing.T) {
 			t.Errorf("got %v error, it should be nil", err)
 		}
 	})
+
+	t.Run("with_error", func(t *testing.T) {
+		mock, _ := pgxmock.NewConn()
+
+		user := &userService.User{
+			ID:       uuid.New(),
+			Username: "lenhador",
+			Password: "12345",
+		}
+
+		mock.ExpectQuery("SELECT (.+) FROM arena_user WHERE (.+)").
+			WillReturnError(errors.New("error"))
+
+		repository := NewPostgreUserRepository(mock)
+		err := repository.AddUser(context.Background(), *user)
+
+		if err == nil {
+			t.Errorf("got %v want nil", err)
+		}
+	})
 }
 
 func TestSearchUserByUsername(t *testing.T) {
