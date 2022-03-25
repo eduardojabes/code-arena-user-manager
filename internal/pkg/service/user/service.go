@@ -11,7 +11,7 @@ import (
 
 type UserRepository interface {
 	GetUser(ctx context.Context, ID uuid.UUID) (*User, error)
-	AddUser(ctx context.Context, user User) (*User, error)
+	AddUser(ctx context.Context, user User) error
 	SearchUserByUsername(ctx context.Context, name string) (*User, error)
 }
 
