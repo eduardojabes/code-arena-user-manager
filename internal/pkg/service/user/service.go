@@ -9,13 +9,20 @@ import (
 	"google.golang.org/grpc"
 )
 
+type UserRepository interface {
+	GetUser(ctx context.Context, ID uuid.UUID) (*User, error)
+	AddUser(ctx context.Context, user User) (*User, error)
+	SearchUserByUsername(ctx context.Context, name string) (*User, error)
+}
+
 type UserService struct {
 	pb.UnimplementedUserServer
+	repository UserRepository
 }
 
 type User struct {
-	name     string
-	password string
+	Username string
+	Password string
 	ID       uuid.UUID
 }
 
@@ -32,6 +39,6 @@ func (s *UserService) Register(sr grpc.ServiceRegistrar) {
 	pb.RegisterUserServer(sr, s)
 }
 
-func NewUserService() *UserService {
-	return &UserService{}
+func NewUserService(repository UserRepository) *UserService {
+	return &UserService{repository: repository}
 }
