@@ -1,0 +1,59 @@
+name: "Development CI"
+
+on: [ push ]
+jobs:
+  quality-code-go-fmt:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up Go 1.18
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.18
+
+      - name: Run Go Fmt
+        id: gofmt
+        run: |
+          if [ "$(gofmt -l -s . | wc -l)" -gt 0 ]; then
+              echo "Formatting issues found, please review your code!"
+              exit 1
+          fi
+
+  quality-code-go-lint:
+    needs: quality-code-go-fmt
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      
+      - name: Set up Go 1.18
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.18
+
+      - name: golangci-lint
+        id: lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.43
+          skip-build-cache: true
+          only-new-issues: true
+
+  quality-code-unit-tests:
+    needs: quality-code-go-lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      
+      - name: Set up Go 1.18
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.18
+      
+      - name: Run Tests
+        id: tests
+        run: |
+          go test -race ./...
