@@ -1,0 +1,80 @@
+name: "Development CI"
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches: 
+      - main
+jobs:
+  quality-code-go-fmt:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Go 1.18
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.18
+
+      - name: Run Go Fmt
+        id: gofmt
+        run: |
+          if [ "$(gofmt -l -s . | wc -l)" -gt 0 ]; then
+              echo "Formatting issues found, please review your code!"
+              exit 1
+          fi
+
+  quality-code-go-lint:
+    needs: quality-code-go-fmt
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      
+      - name: Set up Go 1.18
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.18
+
+      - name: golangci-lint
+        id: lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.45.2
+          skip-build-cache: true
+          only-new-issues: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          skip-go-installation: true
+          skip-pkg-cache: false
+
+  quality-code-unit-tests:
+    needs: quality-code-go-lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      
+      - name: Set up Go 1.18
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.18
+      
+      - name: Run Tests
+        id: tests
+        run: |
+          go test -race ./... -coverprofile=cover-CodeArena.out
+        
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: cover-CodeArena.out
+          path: cover-CodeArena.out
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
