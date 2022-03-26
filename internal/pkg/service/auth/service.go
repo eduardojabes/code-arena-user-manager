@@ -13,9 +13,8 @@ import (
 
 var (
 	ErrInvalidToken = errors.New("invalid or expired token")
+	ErrEmptyKey     = errors.New("emptykey")
 )
-
-var JWTKey = []byte("code-arena-key")
 
 type JWTClaims struct {
 	UserID uuid.UUID `json:"id"`
@@ -25,10 +24,26 @@ type JWTClaims struct {
 type AuthService struct {
 	pb.UnimplementedAuthServer
 	userService UserService
+	JWTKey      []byte
 }
 
 type UserService interface {
 	GetUserByUserNameAndPassword(ctx context.Context, in *pbU.GetUserByUserNameAndPasswordRequest) (*pbU.GetUserByUserNameAndPasswordResponse, error)
+}
+
+func (a *AuthService) generatejwt(userid uuid.UUID, secret []byte) (string, error) {
+	if len(secret) == 0 {
+		return "", ErrEmptyKey
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, JWTClaims{
+		StandardClaims: jwt.StandardClaims{
+			Issuer:    "code-arena",
+			IssuedAt:  time.Now().Unix(),
+			ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
+		}, UserID: userid,
+	})
+
+	return token.SignedString(secret)
 }
 
 func (a *AuthService) GenerateToken(ctx context.Context, in *pb.GenerateTokenRequest) (*pb.GenerateTokenResponse, error) {
@@ -41,42 +56,34 @@ func (a *AuthService) GenerateToken(ctx context.Context, in *pb.GenerateTokenReq
 		return nil, err
 	}
 
-	userid, err := uuid.Parse(user.GetUserID())
+	userId, err := uuid.Parse(user.GetUserID())
 	if err != nil {
 		return nil, err
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodRS256, JWTClaims{
-		StandardClaims: jwt.StandardClaims{
-			Issuer:    "code-arena",
-			IssuedAt:  time.Now().Unix(),
-			ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
-		}, UserID: userid,
-	})
-
-	stoken, err := token.SignedString(JWTKey)
+	token, err := a.generatejwt(userId, a.JWTKey)
 	if err != nil {
 		return nil, err
 	}
-	return &pb.GenerateTokenResponse{Token: stoken}, nil
+	return &pb.GenerateTokenResponse{Token: token}, nil
 }
 
 func (a *AuthService) VerifyToken(ctx context.Context, in *pb.VerifyTokenRequest) (*pb.VerifyTokenResponse, error) {
 	var claims JWTClaims
 
-	token, err := jwt.ParseWithClaims(in.GetToken(), claims, func(t *jwt.Token) (interface{}, error) {
-		return JWTKey, nil
+	token, err := jwt.ParseWithClaims(in.GetToken(), &claims, func(t *jwt.Token) (interface{}, error) {
+		return a.JWTKey, nil
 	})
-	if err != nil {
-		return nil, err
-	}
-
-	if !token.Valid {
+	if err != nil || !token.Valid {
 		return nil, ErrInvalidToken
 	}
+
 	return &pb.VerifyTokenResponse{ValidToken: true}, nil
 }
 
-func NewAuthService(us UserService) *AuthService {
-	return &AuthService{userService: us}
+func NewAuthService(us UserService, jwtKey []byte) *AuthService {
+	return &AuthService{
+		userService: us,
+		JWTKey:      jwtKey,
+	}
 }

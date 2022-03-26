@@ -18,6 +18,12 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      - name: Cache Go packages
+        uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+
       - name: Set up Go 1.18
         uses: actions/setup-go@v1
         with:
@@ -38,6 +44,12 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
       
+      - name: Cache Go packages
+        uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+
       - name: Set up Go 1.18
         uses: actions/setup-go@v1
         with:
@@ -63,6 +75,12 @@ jobs:
         with:
           fetch-depth: 0
       
+      - name: Cache Go packages
+        uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+
       - name: Cache SonarCloud packages
         uses: actions/cache@v2
         with:
