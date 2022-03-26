@@ -72,7 +72,7 @@ func (s *UserService) CreateUser(ctx context.Context, in *pb.CreateUserRequest) 
 func (s *UserService) GetUser(ctx context.Context, in *pb.GetUserByUsernameRequest) (*pb.GetUserByUsernameResponse, error) {
 	user, err := s.repository.SearchUserByUsername(ctx, in.GetName())
 	if err != nil {
-		err = fmt.Errorf("error while creating user: %w", err)
+		err = fmt.Errorf("error while getting user: %w", err)
 		return nil, err
 	}
 
