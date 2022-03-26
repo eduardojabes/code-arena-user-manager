@@ -4,3 +4,4 @@ migrate:
 
 generate-proto:
 	protoc --go_out=. --go-grpc_out=. ./proto/user/user.proto
+	protoc --go_out=. --go-grpc_out=. ./proto/auth/auth.proto

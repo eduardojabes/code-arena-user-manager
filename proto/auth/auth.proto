@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+option go_package = "./proto/auth";
+
+service Auth {
+  // Sends User Login Data and Recive Data
+  rpc GenerateToken (GenerateTokenRequest) returns (GenerateTokenResponse) {}
+  rpc VerifyToken (VerifyTokenRequest) returns (VerifyTokenResponse) {}
+}
+
+// The request message containing the user's name.
+message GenerateTokenRequest {
+  string username = 1;
+  string password = 2;
+}
+
+// The response message containing the UserID
+message GenerateTokenResponse {
+  string token = 1;
+}
+
+message VerifyTokenRequest {
+  string token = 1;
+}
+
+message VerifyTokenResponse {
+  bool validToken = 1;
+}
