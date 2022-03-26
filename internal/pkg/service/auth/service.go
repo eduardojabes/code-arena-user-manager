@@ -9,6 +9,7 @@ import (
 	pbU "github.com/eduardojabes/CodeArena/proto/user"
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
+	"google.golang.org/grpc"
 )
 
 var (
@@ -79,6 +80,10 @@ func (a *AuthService) VerifyToken(ctx context.Context, in *pb.VerifyTokenRequest
 	}
 
 	return &pb.VerifyTokenResponse{ValidToken: true}, nil
+}
+
+func (s *AuthService) Register(sr grpc.ServiceRegistrar) {
+	pb.RegisterAuthServer(sr, s)
 }
 
 func NewAuthService(us UserService, jwtKey []byte) *AuthService {

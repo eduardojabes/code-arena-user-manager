@@ -9,6 +9,7 @@ import (
 	"syscall"
 
 	userRepository "github.com/eduardojabes/CodeArena/internal/pkg/repository/user"
+	"github.com/eduardojabes/CodeArena/internal/pkg/service/auth"
 	userService "github.com/eduardojabes/CodeArena/internal/pkg/service/user"
 	"github.com/eduardojabes/CodeArena/internal/pkg/util"
 	"github.com/jackc/pgx/v4"
@@ -37,8 +38,10 @@ func main() {
 	s := grpc.NewServer()
 
 	repository := userRepository.NewPostgreUserRepository(conn)
-	service := userService.NewUserService(repository, util.NewBCryptHasher())
-	service.Register(s)
+	userService := userService.NewUserService(repository, util.NewBCryptHasher())
+	authService := auth.NewAuthService(userService, []byte("code-arena-key"))
+	userService.Register(s)
+	authService.Register(s)
 
 	go func() {
 		log.Printf("server listening at %v", lis.Addr())

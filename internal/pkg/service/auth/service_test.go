@@ -11,6 +11,7 @@ import (
 	pbU "github.com/eduardojabes/CodeArena/proto/user"
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
+	"google.golang.org/grpc"
 )
 
 type userServiceMock struct {
@@ -154,4 +155,11 @@ func TestVerifyToken(t *testing.T) {
 			t.Errorf("got %v want true", got.GetValidToken())
 		}
 	})
+}
+
+func TestRegisterUserService(t *testing.T) {
+	s := grpc.NewServer()
+	service := NewAuthService(&userServiceMock{}, []byte("code-arena-key"))
+
+	service.Register(s)
 }
