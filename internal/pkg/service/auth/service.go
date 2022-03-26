@@ -5,8 +5,8 @@ import (
 	"errors"
 	"time"
 
-	pb "github.com/eduardojabes/CodeArena/proto/auth"
-	pbU "github.com/eduardojabes/CodeArena/proto/user"
+	pb "github.com/eduardojabes/code-arena-user-manager/proto/auth"
+	pbU "github.com/eduardojabes/code-arena-user-manager/proto/user"
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 	"google.golang.org/grpc"

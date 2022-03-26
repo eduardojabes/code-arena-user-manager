@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/eduardojabes/CodeArena/internal/pkg/entity"
-	"github.com/eduardojabes/CodeArena/proto/auth"
-	pbU "github.com/eduardojabes/CodeArena/proto/user"
+	"github.com/eduardojabes/code-arena-user-manager/internal/pkg/entity"
+	"github.com/eduardojabes/code-arena-user-manager/proto/auth"
+	pbU "github.com/eduardojabes/code-arena-user-manager/proto/user"
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 	"google.golang.org/grpc"

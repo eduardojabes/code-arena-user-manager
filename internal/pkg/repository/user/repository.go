@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/eduardojabes/CodeArena/internal/pkg/entity"
+	"github.com/eduardojabes/code-arena-user-manager/internal/pkg/entity"
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/google/uuid"
 	"github.com/jackc/pgconn"

@@ -1,4 +1,4 @@
-module github.com/eduardojabes/CodeArena
+module github.com/eduardojabes/code-arena-user-manager
 
 go 1.18
 

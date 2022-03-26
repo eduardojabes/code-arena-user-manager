@@ -6,10 +6,10 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/eduardojabes/CodeArena/internal/pkg/entity"
-	"github.com/eduardojabes/CodeArena/internal/pkg/util"
-	"github.com/eduardojabes/CodeArena/internal/test"
-	pb "github.com/eduardojabes/CodeArena/proto/user"
+	"github.com/eduardojabes/code-arena-user-manager/internal/pkg/entity"
+	"github.com/eduardojabes/code-arena-user-manager/internal/pkg/util"
+	"github.com/eduardojabes/code-arena-user-manager/internal/test"
+	pb "github.com/eduardojabes/code-arena-user-manager/proto/user"
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
 )

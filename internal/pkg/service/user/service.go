@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/eduardojabes/CodeArena/internal/pkg/entity"
-	pb "github.com/eduardojabes/CodeArena/proto/user"
+	"github.com/eduardojabes/code-arena-user-manager/internal/pkg/entity"
+	pb "github.com/eduardojabes/code-arena-user-manager/proto/user"
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
 )
