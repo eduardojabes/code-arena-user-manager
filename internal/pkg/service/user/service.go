@@ -93,14 +93,14 @@ func (s *UserService) GetUserByUserNameAndPassword(ctx context.Context, in *pb.G
 	})
 
 	if err != nil {
+		if errors.Is(err, ErrUserNotExists) {
+			return nil, ErrInvalidPassword
+		}
 		return nil, err
 	}
 
 	ok, err := s.hasher.CompareHashAndPassword(user.GetPassword(), in.GetPassword())
 	if err != nil {
-		if errors.Is(err, ErrUserNotExists) {
-			return nil, ErrInvalidPassword
-		}
 		return nil, err
 	}
 
