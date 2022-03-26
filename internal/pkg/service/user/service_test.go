@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"errors"
+	"reflect"
 	"testing"
 
 	"github.com/eduardojabes/CodeArena/internal/pkg/entity"
@@ -107,7 +108,6 @@ func TestCreateUser(t *testing.T) {
 
 	t.Run("Error while hashing password", func(t *testing.T) {
 		want := errors.New("error")
-
 		input := &pb.CreateUserRequest{Name: "name", Password: "password"}
 
 		hasher := &test.MockHasher{
@@ -127,6 +127,72 @@ func TestCreateUser(t *testing.T) {
 
 		if !errors.Is(got, want) {
 			t.Errorf("got %v want %v", got, want)
+		}
+	})
+}
+
+func TestGetUser(t *testing.T) {
+	t.Run("error on search user", func(t *testing.T) {
+		want := errors.New("error")
+		repository := &test.MockUserRepository{
+			SearchUserByUsernameMock: func(ctx context.Context, name string) (*entity.User, error) {
+				return nil, want
+			},
+		}
+
+		service := NewUserService(repository, util.NewBCryptHasher())
+
+		_, got := service.GetUser(context.Background(), &pb.GetUserByUsernameRequest{})
+		if !errors.Is(got, want) {
+			t.Errorf("got %v want %v", got, want)
+		}
+	})
+
+	t.Run("error username not exists", func(t *testing.T) {
+		want := ErrUserNotExists
+		repository := &test.MockUserRepository{
+			SearchUserByUsernameMock: func(ctx context.Context, name string) (*entity.User, error) {
+				return nil, nil
+			},
+		}
+
+		service := NewUserService(repository, util.NewBCryptHasher())
+
+		_, got := service.GetUser(context.Background(), &pb.GetUserByUsernameRequest{})
+		if !errors.Is(got, want) {
+			t.Errorf("got %v want %v", got, want)
+		}
+	})
+
+	t.Run("getting existent user", func(t *testing.T) {
+		user := &entity.User{
+			ID:       uuid.New(),
+			Username: "user",
+			Password: "password",
+		}
+
+		want := pb.GetUserByUsernameResponse{
+			UserID:   user.ID.String(),
+			Name:     user.Username,
+			Password: user.Password,
+		}
+
+		repository := &test.MockUserRepository{
+			SearchUserByUsernameMock: func(ctx context.Context, name string) (*entity.User, error) {
+				return user, nil
+			},
+		}
+
+		service := NewUserService(repository, util.NewBCryptHasher())
+
+		got, err := service.GetUser(context.Background(), &pb.GetUserByUsernameRequest{Name: "user"})
+
+		if err != nil {
+			t.Errorf("got %v want nil", got)
+		}
+
+		if !reflect.DeepEqual(&want, got) {
+			t.Errorf("got %v want %v", got, &want)
 		}
 	})
 }

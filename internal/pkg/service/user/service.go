@@ -13,6 +13,7 @@ import (
 
 var (
 	ErrUserAlreadyExists = errors.New("user already exists")
+	ErrUserNotExists     = errors.New("user not exists")
 )
 
 type UserRepository interface {
@@ -66,6 +67,20 @@ func (s *UserService) CreateUser(ctx context.Context, in *pb.CreateUserRequest) 
 	}
 
 	return &pb.CreateUserResponse{UserID: uuid.NewString()}, nil
+}
+
+func (s *UserService) GetUser(ctx context.Context, in *pb.GetUserByUsernameRequest) (*pb.GetUserByUsernameResponse, error) {
+	user, err := s.repository.SearchUserByUsername(ctx, in.GetName())
+	if err != nil {
+		err = fmt.Errorf("error while getting user: %w", err)
+		return nil, err
+	}
+
+	if user == nil {
+		return nil, ErrUserNotExists
+	}
+
+	return &pb.GetUserByUsernameResponse{UserID: user.ID.String(), Name: user.Username, Password: user.Password}, nil
 }
 
 func (s *UserService) Register(sr grpc.ServiceRegistrar) {

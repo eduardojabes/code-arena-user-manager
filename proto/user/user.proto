@@ -5,7 +5,6 @@ option go_package = "./proto/user";
 service User {
   // Sends User Login Data and Recive Data
   rpc CreateUser (CreateUserRequest) returns (CreateUserResponse) {}
-  rpc LogUser (CreateUserRequest) returns (CreateUserResponse) {}
 }
 
 // The request message containing the user's name.
@@ -17,4 +16,14 @@ message CreateUserRequest {
 // The response message containing the UserID
 message CreateUserResponse {
   string userID = 1;
+}
+
+message GetUserByUsernameRequest {
+  string name = 1;
+}
+
+message GetUserByUsernameResponse {
+  string userID = 1;
+  string name = 2;
+  string password = 3;
 }
