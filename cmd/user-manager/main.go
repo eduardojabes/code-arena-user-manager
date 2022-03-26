@@ -8,10 +8,10 @@ import (
 	"os/signal"
 	"syscall"
 
-	userRepository "github.com/eduardojabes/CodeArena/internal/pkg/repository/user"
-	"github.com/eduardojabes/CodeArena/internal/pkg/service/auth"
-	userService "github.com/eduardojabes/CodeArena/internal/pkg/service/user"
-	"github.com/eduardojabes/CodeArena/internal/pkg/util"
+	userRepository "github.com/eduardojabes/code-arena-user-manager/internal/pkg/repository/user"
+	"github.com/eduardojabes/code-arena-user-manager/internal/pkg/service/auth"
+	userService "github.com/eduardojabes/code-arena-user-manager/internal/pkg/service/user"
+	"github.com/eduardojabes/code-arena-user-manager/internal/pkg/util"
 	"github.com/jackc/pgx/v4"
 	"google.golang.org/grpc"
 )

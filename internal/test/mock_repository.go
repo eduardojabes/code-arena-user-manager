@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/eduardojabes/CodeArena/internal/pkg/entity"
+	"github.com/eduardojabes/code-arena-user-manager/internal/pkg/entity"
 	"github.com/google/uuid"
 )
 
