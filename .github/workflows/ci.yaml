@@ -1,6 +1,12 @@
 name: "Development CI"
 
-on: [ push ]
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches: 
+      - main
 jobs:
   quality-code-go-fmt:
     runs-on: ubuntu-latest
@@ -40,6 +46,9 @@ jobs:
           version: v1.45.2
           skip-build-cache: true
           only-new-issues: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          skip-go-installation: true
+          skip-pkg-cache: false
 
   quality-code-unit-tests:
     needs: quality-code-go-lint
