@@ -6,10 +6,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/eduardojabes/CodeArena/internal/pkg/entity"
 	"github.com/google/uuid"
 	"github.com/pashagolub/pgxmock"
-
-	userService "github.com/eduardojabes/CodeArena/internal/pkg/service/user"
 )
 
 func TestGetUser(t *testing.T) {
@@ -34,7 +33,7 @@ func TestGetUser(t *testing.T) {
 	t.Run("with_user", func(t *testing.T) {
 		mock, _ := pgxmock.NewConn()
 
-		user := &userService.User{
+		user := &entity.User{
 			ID:       uuid.New(),
 			Username: "lenhador",
 			Password: "12345",
@@ -76,7 +75,7 @@ func TestAddUser(t *testing.T) {
 	t.Run("Adding User", func(t *testing.T) {
 		mock, _ := pgxmock.NewConn()
 
-		user := &userService.User{
+		user := &entity.User{
 			ID:       uuid.New(),
 			Username: "lenhador",
 			Password: "12345",
@@ -97,7 +96,7 @@ func TestAddUser(t *testing.T) {
 	t.Run("with_error", func(t *testing.T) {
 		mock, _ := pgxmock.NewConn()
 
-		user := &userService.User{
+		user := &entity.User{
 			ID:       uuid.New(),
 			Username: "lenhador",
 			Password: "12345",
@@ -137,7 +136,7 @@ func TestSearchUserByUsername(t *testing.T) {
 	t.Run("with_user", func(t *testing.T) {
 		mock, _ := pgxmock.NewConn()
 
-		user := &userService.User{
+		user := &entity.User{
 			ID:       uuid.New(),
 			Username: "lenhador",
 			Password: "12345",

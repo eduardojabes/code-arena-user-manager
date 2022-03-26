@@ -10,6 +10,7 @@ import (
 
 	userRepository "github.com/eduardojabes/CodeArena/internal/pkg/repository/user"
 	userService "github.com/eduardojabes/CodeArena/internal/pkg/service/user"
+	"github.com/eduardojabes/CodeArena/internal/pkg/util"
 	"github.com/jackc/pgx/v4"
 	"google.golang.org/grpc"
 )
@@ -36,7 +37,7 @@ func main() {
 	s := grpc.NewServer()
 
 	repository := userRepository.NewPostgreUserRepository(conn)
-	service := userService.NewUserService(repository)
+	service := userService.NewUserService(repository, util.NewBCryptHasher())
 	service.Register(s)
 
 	go func() {

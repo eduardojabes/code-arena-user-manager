@@ -4,16 +4,16 @@ import (
 	"context"
 	"fmt"
 
-	userService "github.com/eduardojabes/CodeArena/internal/pkg/service/user"
+	"github.com/eduardojabes/CodeArena/internal/pkg/entity"
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/google/uuid"
 	"github.com/jackc/pgconn"
 )
 
 type UserRepository interface {
-	GetUser(ctx context.Context, ID uuid.UUID) (*userService.User, error)
-	AddUser(ctx context.Context, user userService.User) error
-	SearchUserByUsername(ctx context.Context, name string) (*userService.User, error)
+	GetUser(ctx context.Context, ID uuid.UUID) (*entity.User, error)
+	AddUser(ctx context.Context, user entity.User) error
+	SearchUserByUsername(ctx context.Context, name string) (*entity.User, error)
 }
 
 type UserModel struct {
@@ -35,7 +35,7 @@ func NewPostgreUserRepository(conn connector) *PostgreUserRepository {
 	return &PostgreUserRepository{conn}
 }
 
-func (r *PostgreUserRepository) GetUser(ctx context.Context, ID uuid.UUID) (*userService.User, error) {
+func (r *PostgreUserRepository) GetUser(ctx context.Context, ID uuid.UUID) (*entity.User, error) {
 	var users []*UserModel
 	err := pgxscan.Select(ctx, r.conn, &users, `SELECT * FROM arena_user WHERE u_id = $1`, ID)
 	if err != nil {
@@ -46,14 +46,14 @@ func (r *PostgreUserRepository) GetUser(ctx context.Context, ID uuid.UUID) (*use
 		return nil, nil
 	}
 
-	return &userService.User{
+	return &entity.User{
 		ID:       users[0].ID,
 		Username: users[0].Username,
 		Password: users[0].Password,
 	}, nil
 }
 
-func (r *PostgreUserRepository) AddUser(ctx context.Context, user userService.User) error {
+func (r *PostgreUserRepository) AddUser(ctx context.Context, user entity.User) error {
 	_, err := r.conn.Exec(ctx, `INSERT INTO arena_user(u_id, u_username, u_password) values $1, $2, $3`, user.ID, user.Username, user.Password)
 	if err != nil {
 		return err
@@ -61,7 +61,7 @@ func (r *PostgreUserRepository) AddUser(ctx context.Context, user userService.Us
 	return nil
 }
 
-func (r *PostgreUserRepository) SearchUserByUsername(ctx context.Context, name string) (*userService.User, error) {
+func (r *PostgreUserRepository) SearchUserByUsername(ctx context.Context, name string) (*entity.User, error) {
 	var users []*UserModel
 	err := pgxscan.Select(ctx, r.conn, &users, `SELECT * FROM arena_user WHERE u_username = $1`, name)
 	if err != nil {
@@ -72,7 +72,7 @@ func (r *PostgreUserRepository) SearchUserByUsername(ctx context.Context, name s
 		return nil, nil
 	}
 
-	return &userService.User{
+	return &entity.User{
 		ID:       users[0].ID,
 		Username: users[0].Username,
 		Password: users[0].Password,
