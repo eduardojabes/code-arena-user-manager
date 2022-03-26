@@ -142,7 +142,7 @@ func TestGetUser(t *testing.T) {
 
 		service := NewUserService(repository, util.NewBCryptHasher())
 
-		_, got := service.GetUser(context.Background(), &pb.GetUserByUsernameRequest{})
+		_, got := service.GetUserByUserName(context.Background(), &pb.GetUserByUsernameRequest{})
 		if !errors.Is(got, want) {
 			t.Errorf("got %v want %v", got, want)
 		}
@@ -158,7 +158,7 @@ func TestGetUser(t *testing.T) {
 
 		service := NewUserService(repository, util.NewBCryptHasher())
 
-		_, got := service.GetUser(context.Background(), &pb.GetUserByUsernameRequest{})
+		_, got := service.GetUserByUserName(context.Background(), &pb.GetUserByUsernameRequest{})
 		if !errors.Is(got, want) {
 			t.Errorf("got %v want %v", got, want)
 		}
@@ -185,7 +185,7 @@ func TestGetUser(t *testing.T) {
 
 		service := NewUserService(repository, util.NewBCryptHasher())
 
-		got, err := service.GetUser(context.Background(), &pb.GetUserByUsernameRequest{Name: "user"})
+		got, err := service.GetUserByUserName(context.Background(), &pb.GetUserByUsernameRequest{Name: "user"})
 
 		if err != nil {
 			t.Errorf("got %v want nil", got)
