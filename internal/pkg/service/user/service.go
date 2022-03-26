@@ -14,6 +14,7 @@ import (
 var (
 	ErrUserAlreadyExists = errors.New("user already exists")
 	ErrUserNotExists     = errors.New("user not exists")
+	ErrInvalidPassword   = errors.New("incorrect user name or password")
 )
 
 type UserRepository interface {
@@ -69,7 +70,7 @@ func (s *UserService) CreateUser(ctx context.Context, in *pb.CreateUserRequest) 
 	return &pb.CreateUserResponse{UserID: uuid.NewString()}, nil
 }
 
-func (s *UserService) GetUser(ctx context.Context, in *pb.GetUserByUsernameRequest) (*pb.GetUserByUsernameResponse, error) {
+func (s *UserService) GetUserByUserName(ctx context.Context, in *pb.GetUserByUsernameRequest) (*pb.GetUserByUsernameResponse, error) {
 	user, err := s.repository.SearchUserByUsername(ctx, in.GetName())
 	if err != nil {
 		err = fmt.Errorf("error while getting user: %w", err)
@@ -80,7 +81,34 @@ func (s *UserService) GetUser(ctx context.Context, in *pb.GetUserByUsernameReque
 		return nil, ErrUserNotExists
 	}
 
-	return &pb.GetUserByUsernameResponse{UserID: user.ID.String(), Name: user.Username, Password: user.Password}, nil
+	return &pb.GetUserByUsernameResponse{UserID: user.ID.String(),
+		Name:     user.Username,
+		Password: user.Password,
+	}, nil
+}
+
+func (s *UserService) GetUserByUserNameAndPassword(ctx context.Context, in *pb.GetUserByUserNameAndPasswordRequest) (*pb.GetUserByUserNameAndPasswordResponse, error) {
+	user, err := s.GetUserByUserName(ctx, &pb.GetUserByUsernameRequest{
+		Name: in.GetName(),
+	})
+
+	if err != nil {
+		if errors.Is(err, ErrUserNotExists) {
+			return nil, ErrInvalidPassword
+		}
+		return nil, err
+	}
+
+	ok, err := s.hasher.CompareHashAndPassword(user.GetPassword(), in.GetPassword())
+	if err != nil {
+		return nil, err
+	}
+
+	if !ok {
+		return nil, ErrInvalidPassword
+	}
+
+	return &pb.GetUserByUserNameAndPasswordResponse{UserID: user.GetUserID()}, nil
 }
 
 func (s *UserService) Register(sr grpc.ServiceRegistrar) {

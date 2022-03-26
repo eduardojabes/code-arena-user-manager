@@ -54,7 +54,7 @@ func (r *PostgreUserRepository) GetUser(ctx context.Context, ID uuid.UUID) (*ent
 }
 
 func (r *PostgreUserRepository) AddUser(ctx context.Context, user entity.User) error {
-	_, err := r.conn.Exec(ctx, `INSERT INTO arena_user(u_id, u_username, u_password) values $1, $2, $3`, user.ID, user.Username, user.Password)
+	_, err := r.conn.Exec(ctx, `INSERT INTO arena_user(u_id, u_username, u_password) values($1, $2, $3)`, user.ID, user.Username, user.Password)
 	if err != nil {
 		return err
 	}

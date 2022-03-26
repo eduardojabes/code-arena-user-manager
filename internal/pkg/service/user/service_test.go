@@ -142,7 +142,7 @@ func TestGetUser(t *testing.T) {
 
 		service := NewUserService(repository, util.NewBCryptHasher())
 
-		_, got := service.GetUser(context.Background(), &pb.GetUserByUsernameRequest{})
+		_, got := service.GetUserByUserName(context.Background(), &pb.GetUserByUsernameRequest{})
 		if !errors.Is(got, want) {
 			t.Errorf("got %v want %v", got, want)
 		}
@@ -158,7 +158,7 @@ func TestGetUser(t *testing.T) {
 
 		service := NewUserService(repository, util.NewBCryptHasher())
 
-		_, got := service.GetUser(context.Background(), &pb.GetUserByUsernameRequest{})
+		_, got := service.GetUserByUserName(context.Background(), &pb.GetUserByUsernameRequest{})
 		if !errors.Is(got, want) {
 			t.Errorf("got %v want %v", got, want)
 		}
@@ -185,7 +185,7 @@ func TestGetUser(t *testing.T) {
 
 		service := NewUserService(repository, util.NewBCryptHasher())
 
-		got, err := service.GetUser(context.Background(), &pb.GetUserByUsernameRequest{Name: "user"})
+		got, err := service.GetUserByUserName(context.Background(), &pb.GetUserByUsernameRequest{Name: "user"})
 
 		if err != nil {
 			t.Errorf("got %v want nil", got)
@@ -202,4 +202,153 @@ func TestRegisterUserService(t *testing.T) {
 	service := NewUserService(&test.MockUserRepository{}, util.NewBCryptHasher())
 
 	service.Register(s)
+}
+
+func TestGetUserByUserNameAndPassword(t *testing.T) {
+	t.Run("error getting user", func(t *testing.T) {
+		want := errors.New("error")
+		repository := &test.MockUserRepository{
+			SearchUserByUsernameMock: func(ctx context.Context, name string) (*entity.User, error) {
+				return nil, want
+			},
+		}
+
+		service := NewUserService(repository, util.NewBCryptHasher())
+		_, got := service.GetUserByUserNameAndPassword(context.Background(), &pb.GetUserByUserNameAndPasswordRequest{})
+		if !errors.Is(got, want) {
+			t.Errorf("got %v want %v", got, want)
+		}
+	})
+
+	t.Run("error hashing password", func(t *testing.T) {
+		user := &entity.User{
+			ID:       uuid.New(),
+			Username: "user",
+			Password: "password",
+		}
+
+		want := errors.New("error")
+
+		repository := &test.MockUserRepository{
+			SearchUserByUsernameMock: func(ctx context.Context, name string) (*entity.User, error) {
+				return user, nil
+			},
+		}
+
+		hasher := &test.MockHasher{
+			CompareHashAndPasswordMock: func(hasher string, password string) (bool, error) {
+				return false, want
+			},
+		}
+
+		service := NewUserService(repository, hasher)
+
+		_, got := service.GetUserByUserNameAndPassword(context.Background(), &pb.GetUserByUserNameAndPasswordRequest{
+			Name:     user.Username,
+			Password: user.Password,
+		})
+
+		if !errors.Is(got, want) {
+			t.Errorf("got %v want %v", got, want)
+		}
+	})
+	t.Run("error not exists user", func(t *testing.T) {
+		user := &entity.User{
+			ID:       uuid.New(),
+			Username: "user",
+			Password: "password",
+		}
+
+		want := ErrInvalidPassword
+
+		repository := &test.MockUserRepository{
+			SearchUserByUsernameMock: func(ctx context.Context, name string) (*entity.User, error) {
+				return nil, nil
+			},
+		}
+
+		hasher := &test.MockHasher{
+			CompareHashAndPasswordMock: func(hasher string, password string) (bool, error) {
+				return false, want
+			},
+		}
+
+		service := NewUserService(repository, hasher)
+
+		_, got := service.GetUserByUserNameAndPassword(context.Background(), &pb.GetUserByUserNameAndPasswordRequest{
+			Name:     user.Username,
+			Password: user.Password,
+		})
+
+		if !errors.Is(got, want) {
+			t.Errorf("got %v want %v", got, want)
+		}
+	})
+
+	t.Run("error incorrect password", func(t *testing.T) {
+		user := &entity.User{
+			ID:       uuid.New(),
+			Username: "user",
+			Password: "password",
+		}
+
+		want := ErrInvalidPassword
+
+		repository := &test.MockUserRepository{
+			SearchUserByUsernameMock: func(ctx context.Context, name string) (*entity.User, error) {
+				return user, nil
+			},
+		}
+
+		hasher := &test.MockHasher{
+			CompareHashAndPasswordMock: func(hasher string, password string) (bool, error) {
+				return false, nil
+			},
+		}
+
+		service := NewUserService(repository, hasher)
+
+		_, got := service.GetUserByUserNameAndPassword(context.Background(), &pb.GetUserByUserNameAndPasswordRequest{
+			Name:     user.Username,
+			Password: user.Password,
+		})
+
+		if !errors.Is(got, want) {
+			t.Errorf("got %v want %v", got, want)
+		}
+	})
+
+	t.Run("correct user and password", func(t *testing.T) {
+		user := &entity.User{
+			ID:       uuid.New(),
+			Username: "user",
+			Password: "password",
+		}
+
+		want := &pb.GetUserByUserNameAndPasswordResponse{UserID: user.ID.String()}
+
+		repository := &test.MockUserRepository{
+			SearchUserByUsernameMock: func(ctx context.Context, name string) (*entity.User, error) {
+				return user, nil
+			},
+		}
+
+		hasher := &test.MockHasher{
+			CompareHashAndPasswordMock: func(hasher string, password string) (bool, error) {
+				return true, nil
+			},
+		}
+
+		service := NewUserService(repository, hasher)
+
+		got, _ := service.GetUserByUserNameAndPassword(context.Background(), &pb.GetUserByUserNameAndPasswordRequest{
+			Name:     user.Username,
+			Password: user.Password,
+		})
+
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("got %v want %v", got, want)
+		}
+	})
+
 }

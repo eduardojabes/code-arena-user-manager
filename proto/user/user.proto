@@ -27,3 +27,13 @@ message GetUserByUsernameResponse {
   string name = 2;
   string password = 3;
 }
+
+message GetUserByUserNameAndPasswordRequest {
+  string name = 1;
+  string password = 2;
+}
+
+// The response message containing the UserID
+message GetUserByUserNameAndPasswordResponse {
+  string userID = 1;
+}
